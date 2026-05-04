@@ -4,84 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Koeienvlaai Locator</title>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-      background: #0f172a;
-      color: #e2e8f0;
-      min-height: 100vh;
-      padding: 1.5rem;
-    }
-    h1 {
-      text-align: center;
-      font-size: 1.6rem;
-      font-weight: 700;
-      color: #38bdf8;
-      margin-bottom: 1.5rem;
-      letter-spacing: -0.02em;
-    }
-    .container { max-width: 880px; margin: 0 auto; }
-    .card {
-      background: #1e293b;
-      border: 1px solid #334155;
-      border-radius: 12px;
-      padding: 1.25rem 1.5rem;
-      margin-bottom: 1rem;
-    }
-    .card-title {
-      font-size: 0.7rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: #64748b;
-      margin-bottom: 1rem;
-    }
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.875rem; }
-    .grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 0.875rem; }
-    .field { display: flex; flex-direction: column; gap: 0.3rem; }
-    label { font-size: 0.75rem; color: #94a3b8; font-weight: 500; }
-    input, select {
-      width: 100%; padding: 0.5rem 0.75rem;
-      background: #0f172a; border: 1px solid #334155; border-radius: 6px;
-      color: #f1f5f9; font-size: 0.9rem; transition: border-color 0.15s;
-    }
-    input:focus, select:focus { outline: none; border-color: #38bdf8; box-shadow: 0 0 0 2px rgba(56,189,248,0.15); }
-    .sep { border: none; border-top: 1px solid #2d3d52; margin: 0.875rem 0; }
-    .badge {
-      font-size: 0.7rem; font-weight: 700; padding: 0.2rem 0.55rem;
-      border-radius: 4px; display: inline-block; margin-bottom: 0.6rem;
-    }
-    .badge-a { background: rgba(56,189,248,0.15); color: #38bdf8; }
-    .badge-b { background: rgba(251,146,60,0.15); color: #fb923c; }
-    #calcBtn {
-      width: 100%; padding: 0.8rem; background: #0284c7; color: #fff;
-      border: none; border-radius: 8px; font-size: 0.95rem; font-weight: 600;
-      cursor: pointer; transition: background 0.15s; margin-bottom: 1rem;
-      letter-spacing: 0.01em;
-    }
-    #calcBtn:hover { background: #0369a1; }
-    .canvas-wrapper { overflow: hidden; border-radius: 8px; background: #080f1a; }
-    canvas { display: block; max-width: 100%; }
-    .result-box {
-      margin-top: 1rem; padding: 1rem 1.25rem; border-radius: 8px;
-      border-left: 4px solid #22c55e; background: rgba(34,197,94,0.07);
-    }
-    .result-box.error { border-left-color: #ef4444; background: rgba(239,68,68,0.07); color: #fca5a5; }
-    .vakje-num { font-size: 2.4rem; font-weight: 800; color: #22c55e; line-height: 1; }
-    .coords-detail { margin-top: 0.5rem; font-size: 0.82rem; color: #94a3b8; line-height: 1.7; }
-    .coords-detail strong { color: #cbd5e1; }
-    .warn-txt { color: #f59e0b; font-size: 0.8rem; margin-top: 0.3rem; }
-    @media (max-width: 600px) {
-      .grid-4 { grid-template-columns: 1fr 1fr; }
-      .grid-2 { grid-template-columns: 1fr; }
-    }
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <div class="container">
   <h1>Koeienvlaai Locator</h1>
 
+  <!-- Veldafmetingen -->
   <div class="card">
     <div class="card-title">Veldafmetingen</div>
     <div class="grid-2">
@@ -107,6 +36,7 @@
     </div>
   </div>
 
+  <!-- Metingen -->
   <div class="card">
     <div class="card-title">Metingen</div>
     <div class="grid-4">
@@ -139,10 +69,42 @@
         <input type="number" id="afstandB" value="28" min="0" step="any">
       </div>
     </div>
+    <hr class="sep">
+    <div style="font-size:.7rem;color:#64748b;margin-bottom:.75rem">
+      Meting C — optioneel, alleen nodig bij ambiguïteit (beide snijpunten binnen veld)
+    </div>
+    <div class="grid-4">
+      <div class="field">
+        <div class="badge badge-c">Meting C</div>
+        <label>Hoek</label>
+        <select id="hoekC">
+          <option value="1">Hoek 1 — links-boven</option>
+          <option value="2">Hoek 2 — rechts-boven</option>
+          <option value="3" selected>Hoek 3 — links-onder</option>
+          <option value="4">Hoek 4 — rechts-onder</option>
+        </select>
+      </div>
+      <div class="field" style="justify-content:flex-end">
+        <label>Afstand C (m)</label>
+        <input type="number" id="afstandC" placeholder="leeg = niet gebruiken" min="0" step="any">
+      </div>
+      <div></div>
+      <div></div>
+    </div>
+  </div>
+
+  <!-- Uitgesloten vakjes -->
+  <div class="card">
+    <div class="card-title">Uitgesloten vakjes voor de Lucky Loser Prijs</div>
+    <div class="field">
+      <label>Vakjes gereserveerd door organisatie — doen niet mee aan winnaar of lucky loser (kommagescheiden)</label>
+      <input type="text" id="uitgesloten" placeholder="bv. 5, 12, 47, 103">
+    </div>
   </div>
 
   <button id="calcBtn" onclick="calculate()">Bereken &amp; Visualiseer</button>
 
+  <!-- Resultaat + veldtekening -->
   <div class="card" id="output-card" style="display:none">
     <div class="canvas-wrapper">
       <canvas id="fieldCanvas"></canvas>
@@ -150,675 +112,23 @@
     <div id="result-text"></div>
   </div>
 
+  <!-- Volledig raster -->
   <div class="card" id="full-grid-card" style="display:none">
     <div class="card-title">Volledig raster</div>
     <div id="full-grid-scroll" style="overflow:auto;max-height:520px;border-radius:6px;background:#080f1a;cursor:grab">
       <canvas id="fullGridCanvas" style="display:block"></canvas>
     </div>
     <div style="margin-top:.6rem;display:flex;gap:1rem;align-items:center;flex-wrap:wrap">
-      <div style="display:flex;gap:.5rem;align-items:center;font-size:.75rem;color:#94a3b8">
-        <span style="display:inline-block;width:12px;height:12px;background:rgba(34,197,94,0.4);border:2px solid #22c55e;border-radius:2px"></span> Winnend vakje
-        <span style="display:inline-block;width:12px;height:12px;background:rgba(234,179,8,0.3);border:1px dashed #f59e0b;border-radius:2px;margin-left:.5rem"></span> Buurvakjes
+      <div class="legend-items">
+        <span class="leg-swatch" style="background:rgba(34,197,94,0.4);border:2px solid #22c55e"></span> Winnaar
+        <span class="leg-swatch" style="background:rgba(245,158,11,0.4);border:2px solid #f59e0b;margin-left:.5rem"></span> Lucky loser
+        <span class="leg-swatch" style="background:rgba(234,179,8,0.3);border:1px dashed #f59e0b;margin-left:.5rem"></span> Buurvakjes winnaar
+        <span class="leg-swatch" style="background:rgba(239,68,68,0.2);border:1px solid rgba(239,68,68,0.5);margin-left:.5rem"></span> Uitgesloten
       </div>
-      <button onclick="scrollToWinner()" style="margin-left:auto;padding:.3rem .75rem;background:#0f172a;border:1px solid #334155;border-radius:6px;color:#94a3b8;font-size:.78rem;cursor:pointer">
-        &#8982; Scroll naar winnend vakje
-      </button>
+      <button onclick="scrollToWinner()" class="btn-small">&#8982; Scroll naar winnaar</button>
     </div>
   </div>
 </div>
-
-<script>
-// --- Hoeken ---
-function getCorner(num, L, B) {
-  return { 1:[0,0], 2:[L,0], 3:[0,B], 4:[L,B] }[num];
-}
-
-// --- Snijpunt van twee cirkels ---
-// Geeft [pt1, pt2] of null als geen snijpunt
-function circleIntersect(x1, y1, r1, x2, y2, r2) {
-  const dx = x2 - x1, dy = y2 - y1;
-  const d = Math.hypot(dx, dy);
-  const EPS = 1e-9;
-  if (d < EPS) return null;                    // zelfde middelpunt
-  if (d > r1 + r2 + EPS) return null;          // te ver
-  if (d < Math.abs(r1 - r2) - EPS) return null; // een binnen de andere
-  const a = (r1 * r1 - r2 * r2 + d * d) / (2 * d);
-  const h = Math.sqrt(Math.max(0, r1 * r1 - a * a));
-  const mx = x1 + a * dx / d;
-  const my = y1 + a * dy / d;
-  return [
-    [mx + h * dy / d, my - h * dx / d],
-    [mx - h * dy / d, my + h * dx / d]
-  ];
-}
-
-function insideRect(x, y, L, B, tol = 0.05) {
-  return x >= -tol && x <= L + tol && y >= -tol && y <= B + tol;
-}
-
-// --- Hoofdberekening ---
-function calculate() {
-  const L    = parseFloat(document.getElementById('lengte').value);
-  const B    = parseFloat(document.getElementById('breedte').value);
-  const cols = parseInt(document.getElementById('numCols').value);
-  const rows = parseInt(document.getElementById('numRows').value);
-  const hA   = parseInt(document.getElementById('hoekA').value);
-  const hB   = parseInt(document.getElementById('hoekB').value);
-  const dA   = parseFloat(document.getElementById('afstandA').value);
-  const dB   = parseFloat(document.getElementById('afstandB').value);
-
-  if ([L,B,dA,dB].some(v => isNaN(v) || v <= 0) || cols < 1 || rows < 1)
-    return showError('Vul alle velden in met positieve getallen.');
-  if (hA === hB)
-    return showError('Kies twee verschillende hoeken.');
-
-  const [ax, ay] = getCorner(hA, L, B);
-  const [bx, by] = getCorner(hB, L, B);
-
-  const pts = circleIntersect(ax, ay, dA, bx, by, dB);
-  if (!pts) return showError('De cirkels snijden niet — controleer de afstanden.');
-
-  const inside = pts.filter(([x,y]) => insideRect(x, y, L, B));
-  if (inside.length === 0)
-    return showError('Geen snijpunt binnen het veld — controleer de afstanden.');
-
-  let point, ambiguous = false;
-  if (inside.length === 2) {
-    ambiguous = true;
-    const margin = ([x,y]) => Math.min(x, L-x, y, B-y);
-    point = margin(inside[0]) >= margin(inside[1]) ? inside[0] : inside[1];
-  } else {
-    point = inside[0];
-  }
-
-  const [px, py] = point;
-  const cellW = L / cols;
-  const cellH = B / rows;
-  const col = Math.min(Math.floor(px / cellW), cols - 1);
-  const row = Math.min(Math.floor(py / cellH), rows - 1);
-  const vakjeNum = row * cols + col + 1;
-
-  document.getElementById('output-card').style.display = 'block';
-  document.getElementById('full-grid-card').style.display = 'block';
-
-  drawField({
-    L, B, cols, rows, cellW, cellH,
-    ax, ay, dA, bx, by, dB,
-    px, py, col, row,
-    allPts: pts, hA, hB
-  });
-  renderFullGrid(cols, rows, col, row);
-
-  const c0 = [col * cellW,       row * cellH      ].map(v => v.toFixed(3));
-  const c1 = [(col+1) * cellW,   row * cellH      ].map(v => v.toFixed(3));
-  const c2 = [col * cellW,       (row+1) * cellH  ].map(v => v.toFixed(3));
-  const c3 = [(col+1) * cellW,   (row+1) * cellH  ].map(v => v.toFixed(3));
-
-  // 3×3 buurraster opbouwen
-  const gridCells = [];
-  for (let dr = -1; dr <= 1; dr++) {
-    for (let dc = -1; dc <= 1; dc++) {
-      const nc = col + dc, nr = row + dr;
-      const isWin = dc === 0 && dr === 0;
-      if (isWin) {
-        gridCells.push(`<div style="background:rgba(34,197,94,0.2);border:2px solid #22c55e;border-radius:4px;
-          padding:.35rem;text-align:center;font-weight:800;color:#22c55e;font-size:.95rem">#${vakjeNum}</div>`);
-      } else if (nc >= 0 && nc < cols && nr >= 0 && nr < rows) {
-        const n = nr * cols + nc + 1;
-        gridCells.push(`<div style="background:rgba(234,179,8,0.12);border:1px dashed rgba(234,179,8,0.45);border-radius:4px;
-          padding:.35rem;text-align:center;color:#fbbf24;font-size:.88rem;font-weight:600">#${n}</div>`);
-      } else {
-        gridCells.push(`<div style="border:1px solid #1e293b;border-radius:4px;padding:.35rem;
-          text-align:center;color:#334155;font-size:.88rem">—</div>`);
-      }
-    }
-  }
-
-  // Afstandscontrole
-  const calcDistA = Math.hypot(px - ax, py - ay);
-  const calcDistB = Math.hypot(px - bx, py - by);
-  const errA = Math.abs(calcDistA - dA);
-  const errB = Math.abs(calcDistB - dB);
-  const fmtErr = v => v < 0.001 ? '<span style="color:#4ade80">✓ 0.000</span>'
-                                 : `<span style="color:#f87171">Δ ${v.toFixed(3)}</span>`;
-
-  document.getElementById('result-text').innerHTML = `
-    <div class="result-box">
-      <div class="vakje-num">Vakje #${vakjeNum}</div>
-      <div class="coords-detail">
-        Koeienvlaai: <strong>X = ${px.toFixed(3)} m</strong> &nbsp;|&nbsp; <strong>Y = ${py.toFixed(3)} m</strong><br>
-        Raster: <strong>${cols} kol. × ${rows} rijen</strong> = ${cols*rows} vakjes
-        &nbsp;|&nbsp; Cel: ${cellW.toFixed(3)} m × ${cellH.toFixed(3)} m
-      </div>
-      <hr style="border:none;border-top:1px solid #2d3d52;margin:.75rem 0">
-      <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#64748b;margin-bottom:.6rem">
-        Loodrechte afstanden
-      </div>
-      <div style="display:grid;grid-template-columns:auto 1fr;gap:.4rem 1rem;font-size:.82rem;font-family:monospace;max-width:480px">
-        <div style="color:#94a3b8">&#8592; Kant van parking (links)</div>
-        <div><span style="color:#64748b">X</span> = <span style="color:#94a3b8">${px.toFixed(3)}</span> = <strong style="color:#e2e8f0">${px.toFixed(3)} m</strong></div>
-        <div style="color:#94a3b8">&#8594; Kant van parking (rechts)</div>
-        <div><span style="color:#64748b">Lengte − X</span> = <span style="color:#94a3b8">${L.toFixed(3)} − ${px.toFixed(3)}</span> = <strong style="color:#e2e8f0">${(L - px).toFixed(3)} m</strong></div>
-        <div style="color:#94a3b8">&#8593; Kant van straat (boven)</div>
-        <div><span style="color:#64748b">Y</span> = <span style="color:#94a3b8">${py.toFixed(3)}</span> = <strong style="color:#e2e8f0">${py.toFixed(3)} m</strong></div>
-        <div style="color:#94a3b8">&#8595; Kant van straat (onder)</div>
-        <div><span style="color:#64748b">Breedte − Y</span> = <span style="color:#94a3b8">${B.toFixed(3)} − ${py.toFixed(3)}</span> = <strong style="color:#e2e8f0">${(B - py).toFixed(3)} m</strong></div>
-      </div>
-      <hr style="border:none;border-top:1px solid #2d3d52;margin:.75rem 0">
-      <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#64748b;margin-bottom:.6rem">
-        Afstandscontrole
-      </div>
-      <table style="font-size:.82rem;font-family:monospace;border-collapse:collapse;width:100%;max-width:420px">
-        <thead>
-          <tr style="color:#64748b;font-size:.7rem;text-transform:uppercase;letter-spacing:.05em">
-            <th style="text-align:left;padding:.2rem .5rem .2rem 0;font-weight:600">Meting</th>
-            <th style="text-align:right;padding:.2rem .4rem;font-weight:600">Ingevoerd</th>
-            <th style="text-align:right;padding:.2rem .4rem;font-weight:600">Berekend</th>
-            <th style="text-align:right;padding:.2rem 0 .2rem .4rem;font-weight:600">Verschil</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr style="border-top:1px solid #1e293b">
-            <td style="padding:.3rem .5rem .3rem 0;color:#38bdf8">Hoek ${hA} → punt</td>
-            <td style="text-align:right;padding:.3rem .4rem;color:#cbd5e1">${dA.toFixed(3)} m</td>
-            <td style="text-align:right;padding:.3rem .4rem;color:#cbd5e1">${calcDistA.toFixed(3)} m</td>
-            <td style="text-align:right;padding:.3rem 0 .3rem .4rem">${fmtErr(errA)}</td>
-          </tr>
-          <tr style="border-top:1px solid #1e293b">
-            <td style="padding:.3rem .5rem .3rem 0;color:#fb923c">Hoek ${hB} → punt</td>
-            <td style="text-align:right;padding:.3rem .4rem;color:#cbd5e1">${dB.toFixed(3)} m</td>
-            <td style="text-align:right;padding:.3rem .4rem;color:#cbd5e1">${calcDistB.toFixed(3)} m</td>
-            <td style="text-align:right;padding:.3rem 0 .3rem .4rem">${fmtErr(errB)}</td>
-          </tr>
-        </tbody>
-      </table>
-      <hr style="border:none;border-top:1px solid #2d3d52;margin:.75rem 0">
-      <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#64748b;margin-bottom:.6rem">
-        Omgeving (vakjenummers)
-      </div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.3rem;max-width:240px;font-family:monospace">
-        ${gridCells.join('')}
-      </div>
-      <hr style="border:none;border-top:1px solid #2d3d52;margin:.75rem 0">
-      <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#64748b;margin-bottom:.5rem">
-        Hoekpunten winnend vakje
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.3rem .75rem;font-size:.82rem;font-family:monospace">
-        <span style="color:#94a3b8">↖ links-boven</span>  <strong>(${c0[0]}, ${c0[1]})</strong>
-        <span style="color:#94a3b8">↗ rechts-boven</span> <strong>(${c1[0]}, ${c1[1]})</strong>
-        <span style="color:#94a3b8">↙ links-onder</span>  <strong>(${c2[0]}, ${c2[1]})</strong>
-        <span style="color:#94a3b8">↘ rechts-onder</span> <strong>(${c3[0]}, ${c3[1]})</strong>
-      </div>
-      ${ambiguous ? '<div class="warn-txt" style="margin-top:.5rem">&#9888; Beide snijpunten lagen binnen het veld — meest centrale punt gekozen.</div>' : ''}
-    </div>`;
-}
-
-function showError(msg) {
-  document.getElementById('output-card').style.display = 'block';
-  document.getElementById('result-text').innerHTML =
-    `<div class="result-box error">${msg}</div>`;
-}
-
-// --- Canvas tekening ---
-function drawField({ L, B, cols, rows, cellW, cellH, ax, ay, dA, bx, by, dB, px, py, col, row, allPts, hA, hB }) {
-  const canvas = document.getElementById('fieldCanvas');
-  const PAD = 52;
-  const containerW = canvas.parentElement.clientWidth || 800;
-  const maxW = Math.min(containerW, 820);
-  const maxH = 560;
-  const scale = Math.min((maxW - 2*PAD) / L, (maxH - 2*PAD) / B);
-
-  const W = Math.round(L * scale + 2*PAD);
-  const H = Math.round(B * scale + 2*PAD);
-  canvas.width = W;
-  canvas.height = H;
-
-  const ctx = canvas.getContext('2d');
-  const cx = x => PAD + x * scale;
-  const cy = y => PAD + y * scale;
-
-  // Achtergrond
-  ctx.fillStyle = '#080f1a';
-  ctx.fillRect(0, 0, W, H);
-
-  // Gras
-  const grad = ctx.createLinearGradient(cx(0), cy(0), cx(L), cy(B));
-  grad.addColorStop(0, '#14532d');
-  grad.addColorStop(1, '#166534');
-  ctx.fillStyle = grad;
-  ctx.fillRect(cx(0), cy(0), L*scale, B*scale);
-
-  // Rasterlijnen (alleen als cellen groot genoeg zijn om te zien)
-  const pixW = cellW * scale;
-  const pixH = cellH * scale;
-
-  if (pixW >= 2) {
-    ctx.strokeStyle = 'rgba(255,255,255,0.08)';
-    ctx.lineWidth = 0.5;
-    const stepC = pixW < 4 ? Math.ceil(4 / pixW) : 1;
-    for (let c = 0; c <= cols; c += stepC) {
-      ctx.beginPath();
-      ctx.moveTo(cx(c * cellW), cy(0));
-      ctx.lineTo(cx(c * cellW), cy(B));
-      ctx.stroke();
-    }
-  }
-  if (pixH >= 2) {
-    ctx.strokeStyle = 'rgba(255,255,255,0.08)';
-    ctx.lineWidth = 0.5;
-    const stepR = pixH < 4 ? Math.ceil(4 / pixH) : 1;
-    for (let r = 0; r <= rows; r += stepR) {
-      ctx.beginPath();
-      ctx.moveTo(cx(0), cy(r * cellH));
-      ctx.lineTo(cx(L), cy(r * cellH));
-      ctx.stroke();
-    }
-  }
-
-  // Buurvakjes (max 8) — amber invulling
-  const neighborOffsets = [
-    [-1,-1],[0,-1],[1,-1],
-    [-1, 0],       [1, 0],
-    [-1, 1],[0, 1],[1, 1]
-  ];
-  const cellPixW = Math.max(cellW * scale, 2);
-  const cellPixH = Math.max(cellH * scale, 2);
-
-  ctx.fillStyle = 'rgba(234,179,8,0.18)';
-  neighborOffsets.forEach(([dc, dr]) => {
-    const nc = col + dc, nr = row + dr;
-    if (nc >= 0 && nc < cols && nr >= 0 && nr < rows) {
-      ctx.fillRect(cx(nc * cellW), cy(nr * cellH), cellPixW, cellPixH);
-    }
-  });
-
-  // Winnend vakje — opvallende opvulling + gloed
-  const winX = cx(col * cellW), winY = cy(row * cellH);
-  const glow = ctx.createRadialGradient(
-    winX + cellPixW/2, winY + cellPixH/2, 0,
-    winX + cellPixW/2, winY + cellPixH/2, Math.max(cellPixW, cellPixH)
-  );
-  glow.addColorStop(0, 'rgba(34,197,94,0.55)');
-  glow.addColorStop(1, 'rgba(34,197,94,0.15)');
-  ctx.fillStyle = glow;
-  ctx.fillRect(winX, winY, cellPixW, cellPixH);
-
-  // Buurvakjes — rand (enkel als cellen zichtbaar groot zijn)
-  if (cellPixW >= 3 && cellPixH >= 3) {
-    ctx.strokeStyle = 'rgba(234,179,8,0.55)';
-    ctx.lineWidth = 1;
-    ctx.setLineDash([3,2]);
-    neighborOffsets.forEach(([dc, dr]) => {
-      const nc = col + dc, nr = row + dr;
-      if (nc >= 0 && nc < cols && nr >= 0 && nr < rows) {
-        ctx.strokeRect(cx(nc * cellW), cy(nr * cellH), cellPixW, cellPixH);
-      }
-    });
-    ctx.setLineDash([]);
-  }
-
-  // Winnend vakje — rand
-  ctx.strokeStyle = '#22c55e';
-  ctx.lineWidth = Math.max(1.5, Math.min(3, cellPixW / 5));
-  ctx.strokeRect(winX, winY, cellPixW, cellPixH);
-
-  // Vakjenummers in cellen (winnend + buren) — alleen als cellen zichtbaar zijn
-  if (cellPixW >= 14 && cellPixH >= 11) {
-    const winNum = row * cols + col + 1;
-    const fs = Math.min(13, Math.max(7, Math.floor(Math.min(cellPixW, cellPixH) * 0.38)));
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-
-    // Buren eerst (amber)
-    neighborOffsets.forEach(([dc, dr]) => {
-      const nc = col + dc, nr = row + dr;
-      if (nc >= 0 && nc < cols && nr >= 0 && nr < rows) {
-        const num = nr * cols + nc + 1;
-        ctx.font = `bold ${fs}px system-ui`;
-        // Achtergrond-schaduw voor leesbaarheid
-        ctx.fillStyle = 'rgba(8,15,26,0.5)';
-        ctx.fillText(String(num), cx(nc*cellW) + cellPixW/2 + 1, cy(nr*cellH) + cellPixH/2 + 1);
-        ctx.fillStyle = 'rgba(234,179,8,0.95)';
-        ctx.fillText(String(num), cx(nc*cellW) + cellPixW/2, cy(nr*cellH) + cellPixH/2);
-      }
-    });
-
-    // Winnend vakje (wit)
-    ctx.font = `bold ${fs}px system-ui`;
-    ctx.fillStyle = 'rgba(8,15,26,0.5)';
-    ctx.fillText(String(winNum), winX + cellPixW/2 + 1, winY + cellPixH/2 + 1);
-    ctx.fillStyle = 'rgba(255,255,255,0.95)';
-    ctx.fillText(String(winNum), winX + cellPixW/2, winY + cellPixH/2);
-  }
-
-  // Cirkels — geknipt tot canvas
-  const drawCircle = (ox, oy, radius, color) => {
-    ctx.save();
-    ctx.beginPath();
-    ctx.rect(0, 0, W, H);
-    ctx.clip();
-    ctx.beginPath();
-    ctx.arc(cx(ox), cy(oy), radius * scale, 0, Math.PI * 2);
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-    ctx.restore();
-  };
-  drawCircle(ax, ay, dA, 'rgba(56,189,248,0.55)');
-  drawCircle(bx, by, dB, 'rgba(251,146,60,0.55)');
-
-  // Afstandslijnen (gestippeld)
-  ctx.setLineDash([4,3]);
-  ctx.lineWidth = 1;
-  ctx.strokeStyle = 'rgba(56,189,248,0.35)';
-  ctx.beginPath(); ctx.moveTo(cx(ax), cy(ay)); ctx.lineTo(cx(px), cy(py)); ctx.stroke();
-  ctx.strokeStyle = 'rgba(251,146,60,0.35)';
-  ctx.beginPath(); ctx.moveTo(cx(bx), cy(by)); ctx.lineTo(cx(px), cy(py)); ctx.stroke();
-  ctx.setLineDash([]);
-
-  // Veldrand
-  ctx.strokeStyle = '#cbd5e1';
-  ctx.lineWidth = 2;
-  ctx.strokeRect(cx(0), cy(0), L*scale, B*scale);
-
-  // As-aftekeningen
-  ctx.fillStyle = '#4b5e77';
-  ctx.font = '10px system-ui';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'top';
-  const ticksX = Math.min(10, cols);
-  for (let i = 0; i <= ticksX; i++) {
-    const v = (L / ticksX) * i;
-    ctx.fillText(Number.isInteger(v) ? v : v.toFixed(1), cx(v), cy(B) + 5);
-  }
-  ctx.textAlign = 'right';
-  ctx.textBaseline = 'middle';
-  const ticksY = Math.min(10, rows);
-  for (let i = 0; i <= ticksY; i++) {
-    const v = (B / ticksY) * i;
-    ctx.fillText(Number.isInteger(v) ? v : v.toFixed(1), cx(0) - 5, cy(v));
-  }
-
-  // As-labels
-  ctx.fillStyle = '#475569';
-  ctx.font = '11px system-ui';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'bottom';
-  ctx.fillText('X  —  Kant van straat (m)', cx(L/2), H - 2);
-  ctx.save();
-  ctx.translate(13, cy(B/2));
-  ctx.rotate(-Math.PI/2);
-  ctx.textBaseline = 'top';
-  ctx.fillText('Y  —  Kant van parking (m)', 0, 0);
-  ctx.restore();
-
-  // Hoekcirkels + labels
-  const cornerDefs = [
-    [0,  0,  'H1', -1, -1],
-    [L,  0,  'H2',  1, -1],
-    [0,  B,  'H3', -1,  1],
-    [L,  B,  'H4',  1,  1]
-  ];
-  cornerDefs.forEach(([fx, fy, lbl, sx, sy]) => {
-    ctx.fillStyle = '#475569';
-    ctx.beginPath();
-    ctx.arc(cx(fx), cy(fy), 4, 0, Math.PI*2);
-    ctx.fill();
-    ctx.font = 'bold 11px system-ui';
-    ctx.fillStyle = '#64748b';
-    ctx.textAlign = sx < 0 ? 'right' : 'left';
-    ctx.textBaseline = sy < 0 ? 'bottom' : 'top';
-    ctx.fillText(lbl, cx(fx) + sx * 7, cy(fy) + sy * 7);
-  });
-
-  // Gekozen hoeken markeren
-  const highlightCorner = (ox, oy, color) => {
-    ctx.beginPath();
-    ctx.arc(cx(ox), cy(oy), 9, 0, Math.PI*2);
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 2;
-    ctx.stroke();
-  };
-  highlightCorner(ax, ay, '#38bdf8');
-  highlightCorner(bx, by, '#fb923c');
-
-  // Ander snijpunt (verworpen)
-  allPts.forEach(([ix, iy]) => {
-    if (Math.abs(ix - px) > 0.001 || Math.abs(iy - py) > 0.001) {
-      ctx.beginPath();
-      ctx.arc(cx(ix), cy(iy), 5, 0, Math.PI*2);
-      ctx.fillStyle = 'rgba(239,68,68,0.4)';
-      ctx.fill();
-      ctx.strokeStyle = '#ef4444';
-      ctx.lineWidth = 1;
-      ctx.stroke();
-      ctx.fillStyle = '#ef4444';
-      ctx.font = '9px system-ui';
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'bottom';
-      ctx.fillText('✕', cx(ix)+7, cy(iy)-4);
-    }
-  });
-
-  // Kruisdraad
-  ctx.strokeStyle = 'rgba(34,197,94,0.3)';
-  ctx.lineWidth = 1;
-  ctx.setLineDash([4,4]);
-  ctx.beginPath(); ctx.moveTo(cx(0), cy(py)); ctx.lineTo(cx(L), cy(py)); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(cx(px), cy(0)); ctx.lineTo(cx(px), cy(B)); ctx.stroke();
-  ctx.setLineDash([]);
-
-  // Snijpunt
-  ctx.beginPath();
-  ctx.arc(cx(px), cy(py), 8, 0, Math.PI*2);
-  ctx.fillStyle = '#22c55e';
-  ctx.fill();
-  ctx.strokeStyle = '#fff';
-  ctx.lineWidth = 2.5;
-  ctx.stroke();
-
-  // Hoekpunten van winnend vakje
-  const winCellCorners = [
-    { fx: col * cellW,       fy: row * cellH,       ax: -1, ay: -1 },
-    { fx: (col+1) * cellW,   fy: row * cellH,       ax:  1, ay: -1 },
-    { fx: col * cellW,       fy: (row+1) * cellH,   ax: -1, ay:  1 },
-    { fx: (col+1) * cellW,   fy: (row+1) * cellH,   ax:  1, ay:  1 },
-  ];
-  const showCornerLabels = cellPixW >= 48 && cellPixH >= 28;
-  winCellCorners.forEach(({ fx, fy, ax: ta, ay: tb }) => {
-    // Punt
-    ctx.beginPath();
-    ctx.arc(cx(fx), cy(fy), 4.5, 0, Math.PI*2);
-    ctx.fillStyle = '#fff';
-    ctx.fill();
-    ctx.strokeStyle = '#22c55e';
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-
-    if (showCornerLabels) {
-      const lbl = `(${fx.toFixed(2)},${fy.toFixed(2)})`;
-      ctx.font = 'bold 9px system-ui';
-      const tw = ctx.measureText(lbl).width;
-      const lx = cx(fx) + ta * (tw/2 + 5);
-      const ly = cy(fy) + tb * 10;
-      ctx.fillStyle = 'rgba(8,15,26,0.75)';
-      ctx.fillRect(lx - tw/2 - 2, ly - 7, tw + 4, 13);
-      ctx.fillStyle = '#e2e8f0';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(lbl, lx, ly);
-    }
-  });
-
-  // Coördinaat-label naast punt
-  const lblTxt = `(${px.toFixed(2)}, ${py.toFixed(2)})`;
-  const lblX = cx(px) + 12;
-  const lblY = cy(py) - 6;
-  ctx.font = 'bold 11px system-ui';
-  ctx.textAlign = 'left';
-  ctx.textBaseline = 'bottom';
-  // Schaduw voor leesbaarheid
-  ctx.fillStyle = 'rgba(8,15,26,0.7)';
-  ctx.fillRect(lblX - 2, lblY - 13, ctx.measureText(lblTxt).width + 4, 15);
-  ctx.fillStyle = '#e2e8f0';
-  ctx.fillText(lblTxt, lblX, lblY);
-
-  // Legende (linksboven in veld)
-  const legItems = [
-    ['#38bdf8', `Hoek ${hA}  (${dA} m)`],
-    ['#fb923c', `Hoek ${hB}  (${dB} m)`],
-    ['#22c55e', 'Koeienvlaai'],
-    ['rgba(234,179,8,0.7)', 'Buurvakjes']
-  ];
-  const legX0 = cx(0) + 8;
-  const legY0 = cy(0) + 10;
-  const legH = legItems.length * 17 + 8;
-  const legW = 130;
-  ctx.fillStyle = 'rgba(8,15,26,0.65)';
-  ctx.beginPath();
-  ctx.roundRect(legX0, legY0, legW, legH, 4);
-  ctx.fill();
-  ctx.font = '10px system-ui';
-  legItems.forEach(([color, text], i) => {
-    const y = legY0 + 8 + i * 17;
-    ctx.fillStyle = color;
-    ctx.fillRect(legX0 + 6, y, 10, 10);
-    ctx.fillStyle = '#cbd5e1';
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'top';
-    ctx.fillText(text, legX0 + 20, y);
-  });
-}
-
-// --- Volledig raster ---
-let _fullGridWinCol = 0, _fullGridWinRow = 0, _fullGridCell = 28;
-
-function renderFullGrid(cols, rows, winCol, winRow) {
-  _fullGridWinCol = winCol;
-  _fullGridWinRow = winRow;
-
-  const canvas = document.getElementById('fullGridCanvas');
-  const wrapper = document.getElementById('full-grid-scroll');
-  const wrapW = wrapper.clientWidth || 800;
-
-  // Cel-grootte: pas aan op breedte, minimum 20px
-  const CELL = Math.max(20, Math.min(52, Math.floor((wrapW - 2) / cols)));
-  _fullGridCell = CELL;
-
-  // Header breedte (rijnummer): genoeg voor het grootste getal
-  const HDR_W = Math.max(24, String(rows).length * 8 + 10);
-  const HDR_H = 22;
-
-  canvas.width  = HDR_W + cols * CELL + 1;
-  canvas.height = HDR_H + rows * CELL + 1;
-
-  const ctx = canvas.getContext('2d');
-
-  // Achtergrond
-  ctx.fillStyle = '#080f1a';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  // Burenset
-  const neighborOffsets = [[-1,-1],[0,-1],[1,-1],[-1,0],[1,0],[-1,1],[0,1],[1,1]];
-  const neighborSet = new Set();
-  neighborOffsets.forEach(([dc, dr]) => {
-    const nc = winCol + dc, nr = winRow + dr;
-    if (nc >= 0 && nc < cols && nr >= 0 && nr < rows)
-      neighborSet.add(nr * cols + nc);
-  });
-
-  const fs = Math.max(7, Math.min(13, Math.floor(CELL * 0.42)));
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-
-  // Cellen
-  for (let r = 0; r < rows; r++) {
-    for (let c = 0; c < cols; c++) {
-      const x = HDR_W + c * CELL;
-      const y = HDR_H + r * CELL;
-      const idx = r * cols + c;
-      const num = idx + 1;
-      const isWin = c === winCol && r === winRow;
-      const isNeighbor = neighborSet.has(idx);
-
-      // Achtergrond cel
-      ctx.fillStyle = isWin      ? 'rgba(34,197,94,0.32)'
-                    : isNeighbor ? 'rgba(234,179,8,0.22)'
-                    : '#1a2540';
-      ctx.fillRect(x, y, CELL, CELL);
-
-      // Rand
-      ctx.strokeStyle = isWin      ? '#22c55e'
-                      : isNeighbor ? 'rgba(234,179,8,0.6)'
-                      : '#243050';
-      ctx.lineWidth = isWin ? 1.5 : 0.5;
-      if (isNeighbor && !isWin) ctx.setLineDash([3,2]);
-      ctx.strokeRect(x + 0.5, y + 0.5, CELL - 1, CELL - 1);
-      ctx.setLineDash([]);
-
-      // Nummer
-      ctx.font = `${isWin || isNeighbor ? 'bold ' : ''}${fs}px system-ui`;
-      ctx.fillStyle = isWin      ? '#4ade80'
-                    : isNeighbor ? '#fbbf24'
-                    : '#3d5070';
-      ctx.fillText(String(num), x + CELL / 2, y + CELL / 2);
-    }
-  }
-
-  // Winnende cel: extra dikke rand eroverheen
-  {
-    const x = HDR_W + winCol * CELL;
-    const y = HDR_H + winRow * CELL;
-    ctx.strokeStyle = '#22c55e';
-    ctx.lineWidth = 2.5;
-    ctx.strokeRect(x + 1, y + 1, CELL - 2, CELL - 2);
-  }
-
-  // Kolomkoppen
-  ctx.fillStyle = '#111c30';
-  ctx.fillRect(HDR_W, 0, cols * CELL + 1, HDR_H);
-  const hFs = Math.max(6, Math.min(10, Math.floor(CELL * 0.35)));
-  ctx.font = `bold ${hFs}px system-ui`;
-  ctx.fillStyle = '#4b5e77';
-  for (let c = 0; c < cols; c++) {
-    ctx.fillText(String(c + 1), HDR_W + c * CELL + CELL / 2, HDR_H / 2);
-  }
-
-  // Rijkoppen
-  ctx.fillStyle = '#111c30';
-  ctx.fillRect(0, HDR_H, HDR_W, rows * CELL + 1);
-  ctx.font = `bold ${hFs}px system-ui`;
-  ctx.fillStyle = '#4b5e77';
-  ctx.textAlign = 'right';
-  for (let r = 0; r < rows; r++) {
-    ctx.fillText(String(r + 1), HDR_W - 4, HDR_H + r * CELL + CELL / 2);
-  }
-
-  // Hoek (linksboven leeg)
-  ctx.fillStyle = '#080f1a';
-  ctx.fillRect(0, 0, HDR_W, HDR_H);
-
-  // Scheidingslijn kop/body
-  ctx.strokeStyle = '#2d3d52';
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.moveTo(0, HDR_H); ctx.lineTo(canvas.width, HDR_H); ctx.stroke();
-  ctx.beginPath();
-  ctx.moveTo(HDR_W, 0); ctx.lineTo(HDR_W, canvas.height); ctx.stroke();
-
-  scrollToWinner();
-}
-
-function scrollToWinner() {
-  const wrapper = document.getElementById('full-grid-scroll');
-  const canvas  = document.getElementById('fullGridCanvas');
-  const HDR_W = Math.max(24, String(Math.ceil(canvas.height / _fullGridCell)).length * 8 + 10);
-  const HDR_H = 22;
-  const wx = HDR_W + _fullGridWinCol * _fullGridCell;
-  const wy = HDR_H + _fullGridWinRow * _fullGridCell;
-  wrapper.scrollLeft = Math.max(0, wx - wrapper.clientWidth  / 2 + _fullGridCell / 2);
-  wrapper.scrollTop  = Math.max(0, wy - wrapper.clientHeight / 2 + _fullGridCell / 2);
-}
-</script>
+<script src="app.js"></script>
 </body>
 </html>
