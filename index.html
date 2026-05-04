@@ -54,6 +54,7 @@
     }
     .badge-a { background: rgba(56,189,248,0.15); color: #38bdf8; }
     .badge-b { background: rgba(251,146,60,0.15); color: #fb923c; }
+    .badge-c { background: rgba(167,139,250,0.15); color: #a78bfa; }
     #calcBtn {
       width: 100%; padding: 0.8rem; background: #0284c7; color: #fff;
       border: none; border-radius: 8px; font-size: 0.95rem; font-weight: 600;
@@ -139,6 +140,28 @@
         <input type="number" id="afstandB" value="28" min="0" step="any">
       </div>
     </div>
+    <hr class="sep">
+    <div style="font-size:.7rem;color:#64748b;margin-bottom:.75rem">
+      Meting C — optioneel, alleen nodig bij ambiguïteit (beide snijpunten binnen veld)
+    </div>
+    <div class="grid-4">
+      <div class="field">
+        <div class="badge badge-c">Meting C</div>
+        <label>Hoek</label>
+        <select id="hoekC">
+          <option value="1">Hoek 1 — links-boven</option>
+          <option value="2">Hoek 2 — rechts-boven</option>
+          <option value="3" selected>Hoek 3 — links-onder</option>
+          <option value="4">Hoek 4 — rechts-onder</option>
+        </select>
+      </div>
+      <div class="field" style="justify-content:flex-end">
+        <label>Afstand C (m)</label>
+        <input type="number" id="afstandC" placeholder="leeg = niet gebruiken" min="0" step="any">
+      </div>
+      <div></div>
+      <div></div>
+    </div>
   </div>
 
   <button id="calcBtn" onclick="calculate()">Bereken &amp; Visualiseer</button>
@@ -209,8 +232,15 @@ function calculate() {
 
   if ([L,B,dA,dB].some(v => isNaN(v) || v <= 0) || cols < 1 || rows < 1)
     return showError('Vul alle velden in met positieve getallen.');
+  if (cols * rows > 100000)
+    return showError('Raster te groot — maximaal 100 000 vakjes (bv. 1000 × 100).');
   if (hA === hB)
     return showError('Kies twee verschillende hoeken.');
+
+  const afstandCRaw = document.getElementById('afstandC').value.trim();
+  const hasC = afstandCRaw !== '' && parseFloat(afstandCRaw) > 0;
+  const hC   = hasC ? parseInt(document.getElementById('hoekC').value) : null;
+  const dC   = hasC ? parseFloat(afstandCRaw) : null;
 
   const [ax, ay] = getCorner(hA, L, B);
   const [bx, by] = getCorner(hB, L, B);
@@ -222,11 +252,18 @@ function calculate() {
   if (inside.length === 0)
     return showError('Geen snijpunt binnen het veld — controleer de afstanden.');
 
-  let point, ambiguous = false;
+  let point, ambiguous = false, resolvedByC = false;
   if (inside.length === 2) {
-    ambiguous = true;
-    const margin = ([x,y]) => Math.min(x, L-x, y, B-y);
-    point = margin(inside[0]) >= margin(inside[1]) ? inside[0] : inside[1];
+    if (hasC && hC !== hA && hC !== hB) {
+      const [ccx, ccy] = getCorner(hC, L, B);
+      const distToC = ([x, y]) => Math.abs(Math.hypot(x - ccx, y - ccy) - dC);
+      point = distToC(inside[0]) <= distToC(inside[1]) ? inside[0] : inside[1];
+      resolvedByC = true;
+    } else {
+      ambiguous = true;
+      const margin = ([x,y]) => Math.min(x, L-x, y, B-y);
+      point = margin(inside[0]) >= margin(inside[1]) ? inside[0] : inside[1];
+    }
   } else {
     point = inside[0];
   }
@@ -234,8 +271,8 @@ function calculate() {
   const [px, py] = point;
   const cellW = L / cols;
   const cellH = B / rows;
-  const col = Math.min(Math.floor(px / cellW), cols - 1);
-  const row = Math.min(Math.floor(py / cellH), rows - 1);
+  const col = Math.min(Math.max(0, Math.floor(px / cellW)), cols - 1);
+  const row = Math.min(Math.max(0, Math.floor(py / cellH)), rows - 1);
   const vakjeNum = row * cols + col + 1;
 
   document.getElementById('output-card').style.display = 'block';
@@ -245,7 +282,8 @@ function calculate() {
     L, B, cols, rows, cellW, cellH,
     ax, ay, dA, bx, by, dB,
     px, py, col, row,
-    allPts: pts, hA, hB
+    allPts: pts, hA, hB,
+    hC, dC, hasC
   });
   renderFullGrid(cols, rows, col, row);
 
@@ -281,6 +319,20 @@ function calculate() {
   const errB = Math.abs(calcDistB - dB);
   const fmtErr = v => v < 0.001 ? '<span style="color:#4ade80">✓ 0.000</span>'
                                  : `<span style="color:#f87171">Δ ${v.toFixed(3)}</span>`;
+
+  let calcCRow = '';
+  if (hasC) {
+    const [ccx, ccy] = getCorner(hC, L, B);
+    const calcDistC = Math.hypot(px - ccx, py - ccy);
+    const errC = Math.abs(calcDistC - dC);
+    calcCRow = `
+      <tr style="border-top:1px solid #1e293b">
+        <td style="padding:.3rem .5rem .3rem 0;color:#a78bfa">Hoek ${hC} → punt</td>
+        <td style="text-align:right;padding:.3rem .4rem;color:#cbd5e1">${dC.toFixed(3)} m</td>
+        <td style="text-align:right;padding:.3rem .4rem;color:#cbd5e1">${calcDistC.toFixed(3)} m</td>
+        <td style="text-align:right;padding:.3rem 0 .3rem .4rem">${fmtErr(errC)}</td>
+      </tr>`;
+  }
 
   document.getElementById('result-text').innerHTML = `
     <div class="result-box">
@@ -330,6 +382,7 @@ function calculate() {
             <td style="text-align:right;padding:.3rem .4rem;color:#cbd5e1">${calcDistB.toFixed(3)} m</td>
             <td style="text-align:right;padding:.3rem 0 .3rem .4rem">${fmtErr(errB)}</td>
           </tr>
+          ${calcCRow}
         </tbody>
       </table>
       <hr style="border:none;border-top:1px solid #2d3d52;margin:.75rem 0">
@@ -349,7 +402,8 @@ function calculate() {
         <span style="color:#94a3b8">↙ links-onder</span>  <strong>(${c2[0]}, ${c2[1]})</strong>
         <span style="color:#94a3b8">↘ rechts-onder</span> <strong>(${c3[0]}, ${c3[1]})</strong>
       </div>
-      ${ambiguous ? '<div class="warn-txt" style="margin-top:.5rem">&#9888; Beide snijpunten lagen binnen het veld — meest centrale punt gekozen.</div>' : ''}
+      ${ambiguous ? '<div class="warn-txt" style="margin-top:.5rem">&#9888; Beide snijpunten lagen binnen het veld — meest centrale punt gekozen. Voeg Meting C toe voor zekerheid.</div>' : ''}
+      ${resolvedByC ? '<div style="color:#a78bfa;font-size:.8rem;margin-top:.3rem">&#10003; Meting C heeft het snijpunt eenduidig bepaald.</div>' : ''}
     </div>`;
 }
 
@@ -360,7 +414,7 @@ function showError(msg) {
 }
 
 // --- Canvas tekening ---
-function drawField({ L, B, cols, rows, cellW, cellH, ax, ay, dA, bx, by, dB, px, py, col, row, allPts, hA, hB }) {
+function drawField({ L, B, cols, rows, cellW, cellH, ax, ay, dA, bx, by, dB, px, py, col, row, allPts, hA, hB, hC, dC, hasC }) {
   const canvas = document.getElementById('fieldCanvas');
   const PAD = 52;
   const containerW = canvas.parentElement.clientWidth || 800;
@@ -506,6 +560,10 @@ function drawField({ L, B, cols, rows, cellW, cellH, ax, ay, dA, bx, by, dB, px,
   };
   drawCircle(ax, ay, dA, 'rgba(56,189,248,0.55)');
   drawCircle(bx, by, dB, 'rgba(251,146,60,0.55)');
+  if (hasC) {
+    const [ccx, ccy] = getCorner(hC, L, B);
+    drawCircle(ccx, ccy, dC, 'rgba(167,139,250,0.55)');
+  }
 
   // Afstandslijnen (gestippeld)
   ctx.setLineDash([4,3]);
@@ -514,6 +572,11 @@ function drawField({ L, B, cols, rows, cellW, cellH, ax, ay, dA, bx, by, dB, px,
   ctx.beginPath(); ctx.moveTo(cx(ax), cy(ay)); ctx.lineTo(cx(px), cy(py)); ctx.stroke();
   ctx.strokeStyle = 'rgba(251,146,60,0.35)';
   ctx.beginPath(); ctx.moveTo(cx(bx), cy(by)); ctx.lineTo(cx(px), cy(py)); ctx.stroke();
+  if (hasC) {
+    const [ccx, ccy] = getCorner(hC, L, B);
+    ctx.strokeStyle = 'rgba(167,139,250,0.35)';
+    ctx.beginPath(); ctx.moveTo(cx(ccx), cy(ccy)); ctx.lineTo(cx(px), cy(py)); ctx.stroke();
+  }
   ctx.setLineDash([]);
 
   // Veldrand
@@ -581,6 +644,7 @@ function drawField({ L, B, cols, rows, cellW, cellH, ax, ay, dA, bx, by, dB, px,
   };
   highlightCorner(ax, ay, '#38bdf8');
   highlightCorner(bx, by, '#fb923c');
+  if (hasC) { const [ccx, ccy] = getCorner(hC, L, B); highlightCorner(ccx, ccy, '#a78bfa'); }
 
   // Ander snijpunt (verworpen)
   allPts.forEach(([ix, iy]) => {
@@ -667,6 +731,7 @@ function drawField({ L, B, cols, rows, cellW, cellH, ax, ay, dA, bx, by, dB, px,
   const legItems = [
     ['#38bdf8', `Hoek ${hA}  (${dA} m)`],
     ['#fb923c', `Hoek ${hB}  (${dB} m)`],
+    ...(hasC ? [['#a78bfa', `Hoek ${hC}  (${dC} m)`]] : []),
     ['#22c55e', 'Koeienvlaai'],
     ['rgba(234,179,8,0.7)', 'Buurvakjes']
   ];
@@ -675,8 +740,7 @@ function drawField({ L, B, cols, rows, cellW, cellH, ax, ay, dA, bx, by, dB, px,
   const legH = legItems.length * 17 + 8;
   const legW = 130;
   ctx.fillStyle = 'rgba(8,15,26,0.65)';
-  ctx.beginPath();
-  ctx.roundRect(legX0, legY0, legW, legH, 4);
+  ctxRoundRect(ctx, legX0, legY0, legW, legH, 4);
   ctx.fill();
   ctx.font = '10px system-ui';
   legItems.forEach(([color, text], i) => {
@@ -690,12 +754,23 @@ function drawField({ L, B, cols, rows, cellW, cellH, ax, ay, dA, bx, by, dB, px,
   });
 }
 
+function ctxRoundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+
 // --- Volledig raster ---
-let _fullGridWinCol = 0, _fullGridWinRow = 0, _fullGridCell = 28;
+let _fullGridWinCol = 0, _fullGridWinRow = 0, _fullGridCell = 28, _fullGridRows = 1;
 
 function renderFullGrid(cols, rows, winCol, winRow) {
   _fullGridWinCol = winCol;
   _fullGridWinRow = winRow;
+  _fullGridRows   = rows;
 
   const canvas = document.getElementById('fullGridCanvas');
   const wrapper = document.getElementById('full-grid-scroll');
@@ -812,7 +887,7 @@ function renderFullGrid(cols, rows, winCol, winRow) {
 function scrollToWinner() {
   const wrapper = document.getElementById('full-grid-scroll');
   const canvas  = document.getElementById('fullGridCanvas');
-  const HDR_W = Math.max(24, String(Math.ceil(canvas.height / _fullGridCell)).length * 8 + 10);
+  const HDR_W = Math.max(24, String(_fullGridRows).length * 8 + 10);
   const HDR_H = 22;
   const wx = HDR_W + _fullGridWinCol * _fullGridCell;
   const wy = HDR_H + _fullGridWinRow * _fullGridCell;
